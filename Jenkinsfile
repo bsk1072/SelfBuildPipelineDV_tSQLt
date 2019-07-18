@@ -1,7 +1,3 @@
-pipeline {
-        agent {
-      label 'dockerslave'
-    }
 def BranchToPort(String branchName) {
     def BranchPortMap = [
         [branch: 'master'   , port: 15565],
