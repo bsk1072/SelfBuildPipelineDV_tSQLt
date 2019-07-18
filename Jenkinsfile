@@ -1,3 +1,7 @@
+pipeline {
+        agent {
+      label 'dockerslave'
+    }
 def BranchToPort(String branchName) {
     def BranchPortMap = [
         [branch: 'master'   , port: 15565],
@@ -63,4 +67,5 @@ node('master') {
         bat "sqlcmd -S localhost,${BranchToPort(env.BRANCH_NAME)} -U sa -P P@ssword1 -d SsdtDevOpsDemo -y0 -Q \"SET NOCOUNT ON;EXEC tSQLt.XmlResultFormatter\" -o \"${WORKSPACE}\\SelfBuildPipelineDV_tSQLt.xml\"" 
         junit 'SelfBuildPipelineDV_tSQLt.xml'
     }
+}
 }
