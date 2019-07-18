@@ -42,4 +42,3 @@ node('master') {
         junit 'SelfBuildPipelineDV_tSQLt.xml'
     }
 }
-}
