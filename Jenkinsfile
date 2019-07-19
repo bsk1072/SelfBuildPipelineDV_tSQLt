@@ -36,9 +36,32 @@ node('master') {
             checkout scm
         }
     }
-        stage('run tests') {
+    stage('build dacpac') {
+        bat "\"${tool name: 'Default', type: 'msbuild'}\" /p:Configuration=Release"
+        stash includes: 'SelfBuildPipelineDV_tSQLt\\bin\\Release\\SelfBuildPipelineDV_tSQLt.dacpac', name: 'theDacpac'
+    }
+
+    stage('start container') {
+        timeout(time: 20, unit: 'SECONDS') {
+            StartContainer()
+        }
+    }
+
+    stage('deploy dacpac') {
+        try {
+            timeout(time: 60, unit: 'SECONDS') {
+                DeployDacpac()
+            }
+        }
+        catch (error) {
+            throw error
+        }
+    }
+    
+    stage('run tests') {
         bat "sqlcmd -S localhost,${BranchToPort(env.BRANCH_NAME)} -U sa -P P@ssword1 -d SsdtDevOpsDemo -Q \"EXEC tSQLt.RunAll\""
         bat "sqlcmd -S localhost,${BranchToPort(env.BRANCH_NAME)} -U sa -P P@ssword1 -d SsdtDevOpsDemo -y0 -Q \"SET NOCOUNT ON;EXEC tSQLt.XmlResultFormatter\" -o \"${WORKSPACE}\\SelfBuildPipelineDV_tSQLt.xml\"" 
         junit 'SelfBuildPipelineDV_tSQLt.xml'
     }
+}
 }
